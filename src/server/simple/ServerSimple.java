@@ -15,7 +15,6 @@ public class ServerSimple {
 
 	public static void main(String[] args) throws IOException {
 
-
 		ServerSocket ws = new ServerSocket(7979); // Welcoming Socket
 		System.out.println("[SERVER] Listening on port " + ws.getLocalPort());	
 
