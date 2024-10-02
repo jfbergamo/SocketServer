@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -18,25 +19,16 @@ public class ServerAdvanced {
 
 	public static void main(String[] args) throws IOException {
 		ServerSocket ws = new ServerSocket(7979); // Welcoming Socket
-		ws.setSoTimeout(3000);
 		System.out.println("[SERVER] Listening on port " + ws.getLocalPort());	
 
 		boolean acceptConnections = true;
 		while (acceptConnections) {
-			Socket sock = null; // TODO
-				while (true) {
-				try {
-					sock = ws.accept();
-				} catch (SocketTimeoutException ex) {
-					System.out.println("[SERVER] Connection timeout.");
-					break;
-				}
-			}
-
+			Socket sock = ws.accept();
+			sock.setSoTimeout(10000);
 			long beginConnection = System.currentTimeMillis();
 
-			String addr = sock.getInetAddress().toString();
-			String clientAddr = (!addr.equals("/0:0:0:0:0:0:0:1") ? addr : "localhost") 
+			InetAddress addr = sock.getInetAddress();
+			String clientAddr = (!addr.equals(sock.getLocalAddress()) ? addr.toString() : "localhost") 
 					+ ":" + Integer.toString(sock.getPort());
 			System.out.println("[SERVER] Accepted connection from " + clientAddr);
 
@@ -52,42 +44,48 @@ public class ServerAdvanced {
 			out.println("Sei loggato al server come " + clientAddr);
 
 			boolean acceptCommands = true;
-			while (acceptCommands) {
-				String inputCmd = in.readLine();
-				if (inputCmd == null) inputCmd = "exit";
-				System.out.println("[CLIENT] " + inputCmd);
+			try {
+				while (acceptCommands) {
+					String inputCmd = in.readLine();
+					if (inputCmd == null) inputCmd = "exit";
+					System.out.println("[CLIENT] " + inputCmd);
 
-				Command cmd = StringToCommand(inputCmd);
-				switch (cmd) {
-					case ECHO:
-						out.println("[SERVER] " + inputCmd);
-						break;
-					case HELP:
-						out.println("Comandi disponibili:");
-						out.println("- help: Mostra questo menu");
-						out.println("- date: Mostra la data e l'ora attuali");
-						out.println("- exit, quit, bye: Chiudi la connessione");
-						out.println("- stop: Spegni il server");
-						out.println("-----------");
-						break;
-					case DATE:
-						out.println("[SERVER] Ora esatta: " 
-								+ LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
-						break;
-					case EXIT:
-						acceptCommands = false;
-						break;
-					case STOP:
-						out.println("[SERVER] Chiusura del server in corso...");
-						acceptCommands = false;
-						acceptConnections = false;
-						break;
-					default:
-						acceptCommands = false;
-						acceptConnections = false;
-						System.err.println("Unreachable");
-						break;
+					Command cmd = StringToCommand(inputCmd);
+					switch (cmd) {
+						case ECHO:
+							out.println("[SERVER] " + inputCmd);
+							break;
+						case HELP:
+							out.println("Comandi disponibili:");
+							out.println("- help: Mostra questo menu");
+							out.println("- date: Mostra la data e l'ora attuali");
+							out.println("- exit, quit, bye: Chiudi la connessione");
+							out.println("- stop: Spegni il server");
+							out.println("-----------");
+							break;
+						case DATE:
+							out.println("[SERVER] Ora esatta: " 
+									+ LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+							break;
+						case EXIT:
+							acceptCommands = false;
+							break;
+						case STOP:
+							out.println("[SERVER] Chiusura del server in corso...");
+							acceptCommands = false;
+							acceptConnections = false;
+							break;
+						default:
+							acceptCommands = false;
+							acceptConnections = false;
+							System.err.println("Unreachable");
+							break;
+					}
+
 				}
+			} catch (SocketTimeoutException ex) {
+				System.out.println("[SERVER] Connection with client timeout.");
+				out.println("[SERVER] Tempo di attesa scaduto.");
 			}
 
 			long elapsedTime = System.currentTimeMillis() - beginConnection;
@@ -117,5 +115,5 @@ public class ServerAdvanced {
 		Command command = map.get(cmd);
 		return command != null ? command : Command.ECHO;
 	}
-	
+
 }
