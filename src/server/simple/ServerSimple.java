@@ -21,12 +21,11 @@ public class ServerSimple {
 		boolean go = true;
 		while (go) {
 			Socket sock = ws.accept();
-
+			
 			long beginConnection = System.currentTimeMillis();
-			System.out.println(InetAddress.getLocalHost());
 
-			String addr = sock.getInetAddress().toString();
-			String clientAddr = (!addr.equals("/0:0:0:0:0:0:0:1") ? addr : "localhost") 
+			InetAddress addr = sock.getInetAddress();
+			String clientAddr = (!addr.equals(sock.getLocalAddress()) ? addr.toString() : "localhost") 
 					+ ":" + Integer.toString(sock.getPort());
 			System.out.println("[SERVER] Accepted connection from " + clientAddr);
 
@@ -45,14 +44,14 @@ public class ServerSimple {
 				String cmd = in.readLine();
 				if (cmd == null) cmd = "exit";
 				System.out.println("[CLIENT] " + cmd);
-				out.println("[SERVER] " + cmd);
 
-				if (cmd.equalsIgnoreCase("quit") || cmd.equals("exit")) {
-					if (cmd.equalsIgnoreCase("quit")) {
+				if (cmd.equalsIgnoreCase("quit") || cmd.equalsIgnoreCase("exit") || cmd.equalsIgnoreCase("stop")) {
+					if (cmd.equalsIgnoreCase("stop")) {
 						go = false;
 					}
 					break;
 				}
+				out.println("[SERVER] " + cmd.toUpperCase());
 			}
 
 			long elapsedTime = System.currentTimeMillis() - beginConnection;
