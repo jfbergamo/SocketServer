@@ -1,119 +1,175 @@
 package server.advanced;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.SocketException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 
 public class ServerAdvanced {
 
+	private static final int MAX_ERRORS = 20;
+	
 	public static final String NOME = "Jacopo";
 	public static final String COGNOME = "Bergamasco";
 
-	public static void main(String[] args) throws IOException {
-		ServerSocket ws = new ServerSocket(7979); // Welcoming Socket
+	public static void main(String[] args) {
+		ServerSocket ws;
+		try {
+			ws = new ServerSocket(7979); // Welcoming Socket
+		} catch (IOException ex) {
+			System.err.println("[ERROR] " + ex.getMessage());
+			return;
+		}
+		
 		System.out.println("[SERVER] Listening on port " + ws.getLocalPort());	
 
 		boolean acceptConnections = true;
 		while (acceptConnections) {
-			Socket sock = ws.accept();
-			sock.setSoTimeout(10000);
+			int errors = 0;
+
+			Socket sock;
+			try {
+				sock = ws.accept();
+			} catch (IOException ex) {
+				errors++;
+				System.err.println("[ERROR] " + ex.getMessage());
+				if (errors >= MAX_ERRORS) {
+					System.err.println("[ERROR] Too many errors, server shutting down.");
+					acceptConnections = false;
+				}
+				continue;
+			}
+			errors = 0;
+			
 			long beginConnection = System.currentTimeMillis();
 
-			InetAddress addr = sock.getInetAddress();
-			String clientAddr = (!addr.equals(sock.getLocalAddress()) ? addr.toString() : "localhost") 
-					+ ":" + Integer.toString(sock.getPort());
+			String clientAddr = getClientAddr(sock);
 			System.out.println("[SERVER] Accepted connection from " + clientAddr);
 
-			BufferedReader in = new BufferedReader(
-					new InputStreamReader(sock.getInputStream())
-					);
-			PrintWriter out = new PrintWriter(
-					sock.getOutputStream(), 
-					true
-					);
-
+			BufferedReader in;
+			PrintWriter out;
+			try {
+				in = new BufferedReader(
+						new InputStreamReader(sock.getInputStream())
+						);
+				out = new PrintWriter(
+						sock.getOutputStream(), 
+						true
+						);
+			} catch (IOException ex) {
+				System.err.println("[ERROR] " + ex.getMessage());
+				errors++;
+				if (errors >= MAX_ERRORS) {
+					System.err.println("[ERROR] Too many errors, server shutting down.");
+					acceptConnections = false;
+				}
+				continue;
+			}
+			errors = 0;
+			
 			out.println("Benvenuto nel server di " + COGNOME + " " + NOME + "!");
 			out.println("Sei loggato al server come " + clientAddr);
-
-			boolean acceptCommands = true;
 			try {
-				while (acceptCommands) {
-					String inputCmd = in.readLine();
-					if (inputCmd == null) inputCmd = "exit";
-					System.out.println("[CLIENT] " + inputCmd);
+				try {
+					sock.setSoTimeout(10000);
+				} catch (SocketException ex) {
+					System.err.println("[ERROR] " + ex.getMessage());
+					errors++;
+					if (errors >= MAX_ERRORS) {
+						System.err.println("[ERROR] Too many errors, server shutting down.");
+						acceptConnections = false;
+					}
+					continue;
+				}
+				errors = 0;
 
-					Command cmd = StringToCommand(inputCmd);
-					switch (cmd) {
-						case ECHO:
-							out.println("[SERVER] " + inputCmd);
-							break;
-						case HELP:
-							out.println("Comandi disponibili:");
-							out.println("- help: Mostra questo menu");
-							out.println("- date: Mostra la data e l'ora attuali");
-							out.println("- exit, quit, bye: Chiudi la connessione");
-							out.println("- stop: Spegni il server");
-							out.println("-----------");
-							break;
-						case DATE:
-							out.println("[SERVER] Ora esatta: " 
-									+ LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
-							break;
-						case EXIT:
-							acceptCommands = false;
-							break;
-						case STOP:
-							out.println("[SERVER] Chiusura del server in corso...");
-							acceptCommands = false;
-							acceptConnections = false;
-							break;
-						default:
-							acceptCommands = false;
-							acceptConnections = false;
-							System.err.println("Unreachable");
-							break;
+				boolean acceptCommands = true;
+				while (acceptCommands) {
+					String cmd = getCmd(in);
+					System.out.println("[CLIENT] " + cmd);
+
+					switch (cmd.toLowerCase()) {
+					case "help":
+						out.println("Comandi disponibili:");
+						out.println("- help: Mostra questo menu");
+						out.println("- date: Mostra la data e l'ora attuali");
+						out.println("- exit, quit, bye: Chiudi la connessione");
+						out.println("- stop: Spegni il server");
+						out.println("-----------");
+						break;
+					case "date":
+						out.println("[SERVER] Ora esatta: " 
+								+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy")));
+						break;
+					case "stop":
+						out.println("[SERVER] Chiusura del server in corso...");
+						acceptConnections = false;
+					case "bye":
+					case "quit":
+					case "exit":
+						acceptCommands = false;
+						break;
+					default:
+						out.println("[SERVER] " + cmd.toUpperCase());
+						break;
 					}
 
-				}
+				} // acceptCommands
+
 			} catch (SocketTimeoutException ex) {
 				System.out.println("[SERVER] Connection with client timeout.");
-				out.println("[SERVER] Tempo di attesa scaduto.");
+				out.println("[SERVER] Tempo di inattività scaduto.");
 			}
 
 			long elapsedTime = System.currentTimeMillis() - beginConnection;
 			out.println("Disconnessione. Tempo trascorso: " + elapsedTime + " ms.");
 
-			in.close();
-			out.close();
-			sock.close();
+			try {
+				in.close();
+				out.close();
+				sock.close();
+			} catch (IOException ex) {
+				System.err.println("[ERROR] " + ex.getMessage());
+				errors++;
+				if (errors >= MAX_ERRORS) {
+					System.err.println("[ERROR] Too many errors, server shutting down.");
+					acceptConnections = false;
+				}
+				continue;
+			}
 
 			System.out.println("[SERVER] Connection with client has been closed.");
 			System.out.println("[SERVER] Elapsed time: " + elapsedTime + " ms");
 		}
-		ws.close();
+
+		try {
+			ws.close();
+		} catch (IOException ex) {
+			System.err.println("[ERROR] " + ex.getMessage());
+			return;
+		}
 		System.out.println("Server has stopped.");
 	}
 
-	public static Command StringToCommand(String cmd) {
-		@SuppressWarnings("serial")
-		HashMap<String, Command> map = new HashMap<>() {{
-			put("help", Command.HELP);
-			put("date", Command.DATE);
-			put("quit", Command.EXIT);
-			put("exit", Command.EXIT);
-			put("bye",  Command.EXIT);
-			put("stop", Command.STOP);
-		}};
-		Command command = map.get(cmd);
-		return command != null ? command : Command.ECHO;
+
+	private static String getClientAddr(Socket sock) {
+		InetAddress addr = sock.getInetAddress();
+		return (!addr.equals(sock.getLocalAddress()) ? addr.toString() : "localhost") 
+				+ ":" + Integer.toString(sock.getPort());
 	}
 
+	private static String getCmd(BufferedReader in) throws SocketTimeoutException {
+		try {
+			return in.readLine().toLowerCase();
+		} catch (Exception ex) {
+			return "exit";
+		}
+	}
 }
