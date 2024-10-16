@@ -8,29 +8,29 @@ import java.net.Socket;
 
 public class ClientCLI {
 	public static void main(String[] args) throws IOException {
-		Socket sock = new Socket("192.168.80.52", 7979);
+		Socket sock = new Socket("localhost", 7979);
 		
-		BufferedReader inputStream = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-		PrintWriter outputStream = new PrintWriter(sock.getOutputStream(), true);
+		BufferedReader socketInputStream = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+		PrintWriter socketOutputStream = new PrintWriter(sock.getOutputStream(), true);
 		
-		ServerReceptionsHanlder srh = new ServerReceptionsHanlder(inputStream);
-		Thread t = new Thread(srh);
-		t.start();
-		
-		ClientSender cs = new ClientSender(outputStream);
+		ClientSender cs = new ClientSender(socketOutputStream);
 		new Thread(cs).start();
 		
 		try {
-			t.join();
-		} catch (InterruptedException ex) {
-
+			String msg;
+			while ((msg = socketInputStream.readLine()) != null) {
+				System.out.println(msg);
+			}
+		} catch (IOException ex) {
+			ex.printStackTrace();
 		}
+		
 		cs.stopSending();
 		
-		inputStream.close();
-		outputStream.close();
+		socketInputStream.close();
+		socketOutputStream.close();
 		sock.close();
 		
-		System.out.println("Fine main");
+		System.exit(0);
 	}
 }

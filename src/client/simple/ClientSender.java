@@ -25,10 +25,10 @@ public class ClientSender implements Runnable {
 				ex.printStackTrace();
 			}
 		}
-		System.out.println("Fine sender");
 	}
 	
 	public void stopSending() {
 		send = false;
+		toServer.close();
 	}
 }
