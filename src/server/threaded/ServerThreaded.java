@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+// TODO: lista socket connessi
+// TODO: comando list
 // TODO: Chat globale
 
 public class ServerThreaded {
@@ -12,6 +14,7 @@ public class ServerThreaded {
 	
 	protected static final boolean DO_TIMEOUT = false;
 	public static final int PORT = 7979;
+
 	
 	public static void main(String[] args) {
 		// Creazione Welcoming Socket
