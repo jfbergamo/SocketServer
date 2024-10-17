@@ -109,7 +109,13 @@ public class ServerProtocol implements Runnable {
 
 		long elapsedTime = System.currentTimeMillis() - beginConnection;
 		out.println("Disconnessione. Tempo trascorso: " + elapsedTime + " ms.");
+		
+		exit(in, out, socket, clientAddr);
+		
+		return;
+	}
 
+	private void exit(BufferedReader in, PrintWriter out, Socket socket, String clientAddr) {
 		try {
 			in.close();
 			out.close();
@@ -118,10 +124,8 @@ public class ServerProtocol implements Runnable {
 			System.err.println("ERROR: Couldn't close file descriptor for client " + clientAddr + ", garbage collector should close them anyway.");
 			return;
 		}
-		
-		return;
 	}
-
+	
 	private String getClientAddr(Socket sock) {
 		InetAddress addr = sock.getInetAddress();
 		return (!addr.equals(sock.getLocalAddress()) ? addr.toString() : "localhost") 
@@ -130,7 +134,7 @@ public class ServerProtocol implements Runnable {
 
 	private String getCmd(BufferedReader in) {
 		try {
-			return in.readLine().toLowerCase();
+			return in.readLine().trim();
 		} catch (Exception ex) {
 			return "exit";
 		}
