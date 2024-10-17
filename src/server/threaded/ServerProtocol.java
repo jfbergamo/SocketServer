@@ -10,6 +10,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class ServerProtocol implements Runnable {
 	
@@ -19,9 +20,11 @@ public class ServerProtocol implements Runnable {
 	private static final String PASSWORD = "loris";
 	
 	private Socket socket;
+	private List<Socket> sockets;
 	
-	public ServerProtocol(Socket s) {
+	public ServerProtocol(Socket s, List<Socket> connections) {
 		socket = s;
+		sockets = connections;
 	}
 	
 	@SuppressWarnings("unused")
@@ -54,6 +57,7 @@ public class ServerProtocol implements Runnable {
 		String nome = auth[0];
 		boolean isAdmin = auth.length > 1 && auth[1].equals(PASSWORD);
 		out.println("Sei loggato al server come " + nome + "[" + clientAddr + "]");
+		
 		try { // Socket Timeout
 			if (ServerThreaded.DO_TIMEOUT) try {
 				socket.setSoTimeout(10000);
@@ -73,12 +77,19 @@ public class ServerProtocol implements Runnable {
 					out.println("- help: Mostra questo menu");
 					out.println("- date: Mostra la data e l'ora attuali");
 					out.println("- exit, quit, bye: Chiudi la connessione");
-					out.println("- stop: Spegni il server");
+					out.println("- list: Mostra la lista dei client");
+					out.println("- stop: Spegni il server (solo admin)");
 					out.println("-----------");
 					break;
 				case "date":
 					out.println("[SERVER] Ora esatta: " 
 							+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy")));
+					break;
+				case "list":
+					out.println("[SERVER] Client connessi: " + sockets.size());
+					for (Socket s : sockets) {
+						out.println(s.getInetAddress());
+					}
 					break;
 				case "stop":
 					if (isAdmin) {
@@ -114,8 +125,9 @@ public class ServerProtocol implements Runnable {
 		
 		return;
 	}
-
+	
 	private void exit(BufferedReader in, PrintWriter out, Socket socket, String clientAddr) {
+		sockets.remove(socket);
 		try {
 			in.close();
 			out.close();

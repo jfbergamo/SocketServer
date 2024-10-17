@@ -3,18 +3,19 @@ package server.threaded;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 // TODO: lista socket connessi
 // TODO: comando list
 // TODO: Chat globale
 
 public class ServerThreaded {
-	private static ServerSocket server;
-	private static boolean accept;
-	
 	protected static final boolean DO_TIMEOUT = false;
 	public static final int PORT = 7979;
-
+	
+	private static ServerSocket server;
+	private static boolean accept;
+	private static ArrayList<Socket> connections;
 	
 	public static void main(String[] args) {
 		// Creazione Welcoming Socket
@@ -28,6 +29,7 @@ public class ServerThreaded {
 		System.out.println("INFO: Server avviato su porta " + PORT);
 		
 		// Accettazione connessioni
+		connections = new ArrayList<Socket>();
 		accept = true;
 		while (accept) {
 			Socket connection;
@@ -37,7 +39,8 @@ public class ServerThreaded {
 				System.err.println("ERROR: Connection failed with client: " + ex.getMessage());
 				continue;
 			}
-			new Thread(new ServerProtocol(connection)).start();
+			connections.add(connection);
+			new Thread(new ServerProtocol(connection, connections)).start();
 		}
 		
 	}
