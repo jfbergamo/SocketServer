@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+// TODO: Utente admin che chiude il server
+// TODO: Chat globale
+
 public class ServerThreaded {
 	private static ServerSocket server;
 	private static boolean accept;

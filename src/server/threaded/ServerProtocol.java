@@ -16,6 +16,8 @@ public class ServerProtocol implements Runnable {
 	private static final String NOME = "Jacopo";
 	private static final String COGNOME = "Bergamasco";
 	
+	private static final String PASSWORD = "loris";
+	
 	private Socket socket;
 	
 	public ServerProtocol(Socket s) {
@@ -48,7 +50,9 @@ public class ServerProtocol implements Runnable {
 		
 		out.println("Benvenuto nel server di " + COGNOME + " " + NOME + "!");
 		out.println("Per favore, inserisci il tuo nome: ");
-		String nome = getCmd(in);
+		String[] auth = getCmd(in).split("@");
+		String nome = auth[0];
+		boolean isAdmin = auth.length > 1 && auth[1].equals(PASSWORD);
 		out.println("Sei loggato al server come " + nome + "[" + clientAddr + "]");
 		try { // Socket Timeout
 			if (ServerThreaded.DO_TIMEOUT) try {
@@ -77,11 +81,17 @@ public class ServerProtocol implements Runnable {
 							+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy")));
 					break;
 				case "stop":
-					out.println("[SERVER] Chiusura del server in corso...");
-					ServerThreaded.stop();
+					if (isAdmin) {
+						out.println("[SERVER] Chiusura del server in corso...");
+						ServerThreaded.stop();
+					} else {
+						out.println("[SERVER] ATTENZIONE: Non disponi dei permessi di amministratore per eseguire tale azione.");
+						break;
+					}
 				case "bye":
 				case "quit":
 				case "exit":
+				case "logout":
 					acceptCommands = false;
 					break;
 				default:
