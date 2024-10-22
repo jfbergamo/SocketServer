@@ -13,12 +13,12 @@ import java.util.List;
 import utils.jlibs.MutexSemaphore;
 
 public class ServerProtocol extends Thread {
-	
+
 	private static final String NOME = "Jacopo";
 	private static final String COGNOME = "Bergamasco";
-	
+
 	private static final String PASSWORD = "loris";
-	
+
 	private Client client;
 	private BufferedReader in;
 	private PrintWriter out;
@@ -27,17 +27,16 @@ public class ServerProtocol extends Thread {
 	private boolean isAdmin;
 	private List<Client> clients;
 	private MutexSemaphore sem;
-	
+
 	public ServerProtocol(Client sock, List<Client> connections, MutexSemaphore sem) {
 		client = sock;
 		clients = connections;
 		this.sem = sem;
 	}
-	
+
 	@SuppressWarnings("unused")
 	@Override
 	public void run() {
-		
 		long beginConnection = System.currentTimeMillis();
 
 		getClientAddr();
@@ -55,10 +54,10 @@ public class ServerProtocol extends Thread {
 			System.err.println("ERROR: Unable to interface with client " + clientAddr + ": " + ex.getMessage());
 			return;
 		}
-		
+
 		// Potrei cambiarlo successivamente
 		doAuth();
-		
+
 		try { // Socket Timeout
 			if (ServerThreaded.DO_TIMEOUT) try {
 				client.socket().setSoTimeout(10000);
@@ -73,43 +72,45 @@ public class ServerProtocol extends Thread {
 				System.out.println("[" + nome + "] " + cmd);
 
 				switch (cmd.toLowerCase()) {
-				case "help":
-					out.println("Comandi disponibili:");
-					out.println("- help: Mostra questo menu");
-					out.println("- date: Mostra la data e l'ora attuali");
-					out.println("- exit, quit, bye: Chiudi la connessione");
-					out.println("- list: Mostra la lista dei client");
-					out.println("- stop: Spegni il server (solo admin)");
-					out.println("-----------");
-					break;
-				case "date":
-					out.println("[SERVER] Ora esatta: " 
-							+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy")));
-					break;
-				case "list":
-					out.println("[SERVER] Client connessi: " + clients.size());
-					for (Client s : clients) {
-						out.println("]\t" + s.nome());
-					}
-					break;
-				case "stop":
-				case "shutdown":
-					if (isAdmin) {
-						out.println("[SERVER] Chiusura del server in corso...");
-						ServerThreaded.stop();
-					} else {
-						out.println("[SERVER] ATTENZIONE: Non disponi dei permessi di amministratore per eseguire tale azione.");
+					case "help":
+						out.println("Comandi disponibili:");
+						out.println("- help: Mostra questo menu");
+						out.println("- date: Mostra la data e l'ora attuali");
+						out.println("- exit, quit, bye: Chiudi la connessione");
+						out.println("- list: Mostra la lista dei client");
+						out.println("- stop: Spegni il server (solo admin)");
+						out.println("-----------");
 						break;
-					}
-				case "bye":
-				case "quit":
-				case "exit":
-				case "logout":
-					acceptCommands = false;
-					break;
-				default:
-					out.println("[SERVER] " + cmd.toUpperCase());
-					break;
+					case "date":
+						out.println("[SERVER] Ora esatta: " 
+								+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy")));
+						break;
+					case "list":
+						out.println("[SERVER] Client connessi: " + clients.size());
+						for (Client s : clients) {
+							out.println("]\t" + s.nome());
+						}
+						break;
+					case "stop":
+					case "shutdown":
+						if (isAdmin) {
+							out.println("[SERVER] Chiusura del server in corso...");
+							ServerThreaded.stop();
+						} else {
+							out.println("[SERVER] ATTENZIONE: Non disponi dei permessi di amministratore per eseguire tale azione.");
+							break;
+						}
+					case "bye":
+					case "quit":
+					case "exit":
+					case "logout":
+						acceptCommands = false;
+						break;
+					default:
+						sem.P();
+						out.println("[" + client.nome() + "] " + cmd);
+						sem.V();
+						break;
 				}
 
 			} // acceptCommands
@@ -122,17 +123,17 @@ public class ServerProtocol extends Thread {
 
 		long elapsedTime = System.currentTimeMillis() - beginConnection;
 		out.println("Disconnessione. Tempo trascorso: " + elapsedTime + " ms.");
-		
+
 		exit();
-		
+
 		return;
 	}
-	
+
 	private void exit() {
 		sem.P();
 		clients.remove(client);
 		sem.V();
-		
+
 		try {
 			in.close();
 			out.close();
@@ -142,7 +143,7 @@ public class ServerProtocol extends Thread {
 			return;
 		}
 	}
-	
+
 	private void doAuth() {
 		out.println("Benvenuto nel server di " + COGNOME + " " + NOME + "!");
 		out.println("Per favore, inserisci il tuo nome: ");
@@ -152,11 +153,11 @@ public class ServerProtocol extends Thread {
 		out.println("Sei loggato al server come " + nome + "[" + clientAddr + "]");
 		client.setNome(nome);
 	}
-	
+
 	private void getClientAddr() {
 		InetAddress addr = client.socket().getInetAddress();
 		clientAddr = (!addr.equals(client.socket().getLocalAddress()) ? addr.toString() : "localhost") 
-				      + ":" + Integer.toString(client.socket().getPort());
+				+ ":" + Integer.toString(client.socket().getPort());
 	}
 
 	private String getCmd() {
@@ -168,5 +169,5 @@ public class ServerProtocol extends Thread {
 			return "exit";
 		}
 	}
-	
+
 }

@@ -7,8 +7,6 @@ import java.util.ArrayList;
 
 import utils.jlibs.MutexSemaphore;
 
-// TODO: lista socket connessi
-// TODO: comando list
 // TODO: Chat globale
 
 public class ServerThreaded {
@@ -20,7 +18,7 @@ public class ServerThreaded {
 	private static ArrayList<Client> clients;
 	
 	public static void main(String[] args) {
-		// Inizializzazione semaforo
+		// Inizializzazione semaforo e chat globale
 		MutexSemaphore s = new MutexSemaphore();
 		
 		// Creazione Welcoming Socket
