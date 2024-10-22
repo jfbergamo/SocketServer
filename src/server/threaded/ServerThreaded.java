@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import utils.jlibs.MutexSemaphore;
+
 // TODO: lista socket connessi
 // TODO: comando list
 // TODO: Chat globale
@@ -15,9 +17,12 @@ public class ServerThreaded {
 	
 	private static ServerSocket server;
 	private static boolean accept;
-	private static ArrayList<Socket> connections;
+	private static ArrayList<Client> clients;
 	
 	public static void main(String[] args) {
+		// Inizializzazione semaforo
+		MutexSemaphore s = new MutexSemaphore();
+		
 		// Creazione Welcoming Socket
 		try {
 			server = new ServerSocket(PORT);
@@ -29,18 +34,21 @@ public class ServerThreaded {
 		System.out.println("INFO: Server avviato su porta " + PORT);
 		
 		// Accettazione connessioni
-		connections = new ArrayList<Socket>();
+		clients = new ArrayList<Client>();
 		accept = true;
 		while (accept) {
-			Socket connection;
+			Socket sock;
 			try {
-				connection = server.accept();
+				sock = server.accept();
 			} catch (IOException ex) {
 				System.err.println("ERROR: Connection failed with client: " + ex.getMessage());
 				continue;
 			}
-			connections.add(connection);
-			new Thread(new ServerProtocol(connection, connections)).start();
+			Client client = new Client(sock);
+			s.P();
+			clients.add(client);
+			s.V();
+			new ServerProtocol(client, clients, s).start();
 		}
 		
 	}
