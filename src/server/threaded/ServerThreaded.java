@@ -19,7 +19,7 @@ public class ServerThreaded {
 	
 	private static ServerSocket server;
 	private static boolean accept;
-	private static ArrayList<ServerProtocol> protocols;
+	private static ProtocolList protocols;
 	
 	public static void main(String[] args) {
 		// Inizializzazione semaforo e chat globale
@@ -36,8 +36,13 @@ public class ServerThreaded {
 		System.out.println("INFO: Server avviato su porta " + PORT);
 		
 		// Accettazione connessioni
-		protocols = new ArrayList<ServerProtocol>();
+		protocols = new ProtocolList(s);
 		accept = true;
+		new Thread(() -> {
+			while (accept) try {
+				protocols.broadcast("[SERVER] " + stdin.readLine());
+			} catch (IOException ex) {}
+		});//.start();
 		while (accept) {
 			Socket sock;
 			try {
@@ -51,11 +56,6 @@ public class ServerThreaded {
 			protocols.add(p);
 			s.V();
 			p.start();
-			new Thread(() -> {
-				try {
-					p.globalMessage(stdin.readLine());
-				} catch (IOException ex) {}
-			}).start();
 		}
 		
 	}

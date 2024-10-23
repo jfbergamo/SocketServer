@@ -28,10 +28,10 @@ public class ServerProtocol extends Thread {
 	private String clientAddr;
 	private boolean isAdmin;
 	
-	private List<ServerProtocol> protocols;
+	private ProtocolList protocols;
 	private MutexSemaphore sem;
 
-	public ServerProtocol(Socket sock, List<ServerProtocol> connections, MutexSemaphore sem) {
+	public ServerProtocol(Socket sock, ProtocolList connections, MutexSemaphore sem) {
 		socket = sock;
 		protocols = connections;
 		this.sem = sem;
@@ -110,9 +110,8 @@ public class ServerProtocol extends Thread {
 						acceptCommands = false;
 						break;
 					default:
-						sem.P();
-						out.println("[" + nome + "] " + cmd);
-						sem.V();
+						//out.println("[" + nome + "] " + cmd);
+						protocols.broadcast("[" + nome + "] " + cmd);
 						break;
 				}
 
@@ -133,7 +132,9 @@ public class ServerProtocol extends Thread {
 	}
 
 	public void globalMessage(String message) {
-		out.println("[SERVER] " + message);
+		out.println("\r" + message);
+		out.print("> ");
+		out.flush();
 	}
 	
 	private void exit() {
@@ -167,7 +168,7 @@ public class ServerProtocol extends Thread {
 	}
 
 	private String getCmd() {
-		out.print("> ");
+		out.print("\r> ");
 		out.flush();
 		try {
 			return in.readLine().trim();
