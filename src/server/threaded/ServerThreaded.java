@@ -1,6 +1,8 @@
 package server.threaded;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -13,9 +15,11 @@ public class ServerThreaded {
 	protected static final boolean DO_TIMEOUT = false;
 	public static final int PORT = 7979;
 	
+	private static BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+	
 	private static ServerSocket server;
 	private static boolean accept;
-	private static ArrayList<Client> clients;
+	private static ArrayList<ServerProtocol> protocols;
 	
 	public static void main(String[] args) {
 		// Inizializzazione semaforo e chat globale
@@ -32,7 +36,7 @@ public class ServerThreaded {
 		System.out.println("INFO: Server avviato su porta " + PORT);
 		
 		// Accettazione connessioni
-		clients = new ArrayList<Client>();
+		protocols = new ArrayList<ServerProtocol>();
 		accept = true;
 		while (accept) {
 			Socket sock;
@@ -42,11 +46,16 @@ public class ServerThreaded {
 				System.err.println("ERROR: Connection failed with client: " + ex.getMessage());
 				continue;
 			}
-			Client client = new Client(sock);
+			ServerProtocol p = new ServerProtocol(sock, protocols, s);
 			s.P();
-			clients.add(client);
+			protocols.add(p);
 			s.V();
-			new ServerProtocol(client, clients, s).start();
+			p.start();
+			new Thread(() -> {
+				try {
+					p.globalMessage(stdin.readLine());
+				} catch (IOException ex) {}
+			}).start();
 		}
 		
 	}
