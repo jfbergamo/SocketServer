@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class LottoServerProtocol extends Thread {
 
@@ -38,7 +39,21 @@ public class LottoServerProtocol extends Thread {
 		accept = true;
 		while (accept) {
 			String cmd = getCmd();
-			switch (cmd) {
+			String[] args = getArgs(cmd);
+			if (args.length <= 0) continue;
+			switch (args[0]) {
+				case "lotto":
+					// lotto 24, 12, 11, 23, 9
+					String regex = "^\\s*lotto\\s+(([1-9]|[1-2][0-9]|30)(\\s*,\\s*|\\s+)){4}([1-9]|[1-2][0-9]|30)\\s*$";
+					if (cmd.matches(regex)) {
+						int[] userN = new int[5];
+						for (int i = 0; i < userN.length; i++) {
+							userN[i] = Integer.parseInt(args[i + 1]);
+						}
+					} else {
+						out.println("Sintassi del comando invalida!");
+					}
+					break;
 				case "bye":
 				case "quit":
 				case "exit":
@@ -68,6 +83,10 @@ public class LottoServerProtocol extends Thread {
 		} catch (Exception ex) {
 			return "exit";
 		}
+	}
+	
+	private String[] getArgs(String cmd) {
+		return cmd.split("(\\s*,\\s*|\\s+)");
 	}
 	
 	private void getClientAddr() {
