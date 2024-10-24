@@ -10,7 +10,6 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import utils.jlibs.MutexSemaphore;
 
 public class ServerProtocol extends Thread {
@@ -69,6 +68,7 @@ public class ServerProtocol extends Thread {
 				return;
 			}
 
+			protocols.broadcast("[SERVER] " + nome + " si sta connettendo.");
 			boolean acceptCommands = true;
 			while (acceptCommands) {
 				String cmd = getCmd();
@@ -107,7 +107,9 @@ public class ServerProtocol extends Thread {
 					case "quit":
 					case "exit":
 					case "logout":
+						protocols.broadcast("[SERVER] " + nome + " si sta disconnettendo.");
 						acceptCommands = false;
+					case "":
 						break;
 					default:
 						//out.println("[" + nome + "] " + cmd);
