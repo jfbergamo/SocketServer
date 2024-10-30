@@ -53,7 +53,7 @@ public class LottoServerProtocol extends Thread {
 		new Thread(() -> {
 			final long delay = 180;
 			rngSet = new HashSet<Integer>();
-			time = System.currentTimeMillis();
+			time = 0;
 			Random rng = new Random(time);
 			while (accept) {
 				if (System.currentTimeMillis() - time >= delay*1000) {
@@ -165,7 +165,7 @@ public class LottoServerProtocol extends Thread {
 	}
 	
 	private void draw() {
-		time = System.currentTimeMillis();
+		time = 0;
 	}
 	
 	private String getCmd() {
