@@ -1,26 +1,9 @@
 package utils.jlibs;
 
-public class MutexSemaphore {
-
-	private int count;
+public class MutexSemaphore extends Semaphore {
 
 	public MutexSemaphore() {
-		count = 1;
-	}
-
-	synchronized public void P() {
-		count--;
-		try {
-			if (count < 0) {
-				wait();
-			}
-		} catch (InterruptedException ex) {
-			ex.printStackTrace();
-		}
+		super(1);
 	}
 	
-	synchronized public void V() {
-		count++;
-		notify();
-	}
 }
