@@ -12,10 +12,12 @@ public class ProtocolList extends ArrayList<ServerProtocol> {
 		sem = s;
 	}
 	
-	public void broadcast(String message) {
+	public void broadcast(String message, ServerProtocol protocol) {
 		sem.P();
 		for (ServerProtocol s : this) {
-			s.globalMessage(message);
+			if (s != protocol) {
+				s.globalMessage(message);
+			}
 		}
 		sem.V();
 	}

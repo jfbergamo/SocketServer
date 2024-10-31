@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import utils.jlibs.MutexSemaphore;
 
-public class ServerProtocol extends Thread {
+public class ServerProtocol implements Runnable {
 
 	private static final String NOME = "Jacopo";
 	private static final String COGNOME = "Bergamasco";
@@ -39,6 +39,10 @@ public class ServerProtocol extends Thread {
 	@SuppressWarnings("unused")
 	@Override
 	public void run() {
+		sem.P();
+		protocols.add(this);
+		sem.V();
+		
 		long beginConnection = System.currentTimeMillis();
 
 		getClientAddr();
@@ -68,7 +72,7 @@ public class ServerProtocol extends Thread {
 				return;
 			}
 
-			protocols.broadcast("[SERVER] " + nome + " si sta connettendo.");
+			protocols.broadcast("[SERVER] " + nome + " si sta connettendo.", this);
 			boolean acceptCommands = true;
 			while (acceptCommands) {
 				String cmd = getCmd();
@@ -101,19 +105,26 @@ public class ServerProtocol extends Thread {
 							ServerThreaded.stop();
 						} else {
 							out.println("[SERVER] ATTENZIONE: Non disponi dei permessi di amministratore per eseguire tale azione.");
-							break;
 						}
+						break;
+					case "kick":
+						if (isAdmin) {
+							out.println("[SERVER] Non implementato, dovrai aspettare ancora un po'");
+						} else {
+							out.println("[SERVER] ATTENZIONE: Non disponi dei permessi di amministratore per eseguire tale azione.");
+						}
+						break;
 					case "bye":
 					case "quit":
 					case "exit":
 					case "logout":
-						protocols.broadcast("[SERVER] " + nome + " si sta disconnettendo.");
+						protocols.broadcast("[SERVER] " + nome + " si sta disconnettendo.", this);
 						acceptCommands = false;
 					case "":
 						break;
 					default:
 						//out.println("[" + nome + "] " + cmd);
-						protocols.broadcast("[" + nome + "] " + cmd);
+						protocols.broadcast("[" + nome + "] " + cmd, this);
 						break;
 				}
 
@@ -142,7 +153,6 @@ public class ServerProtocol extends Thread {
 	private void exit() {
 		sem.P();
 		protocols.remove(this);
-		sem.V();
 
 		try {
 			in.close();
@@ -152,14 +162,18 @@ public class ServerProtocol extends Thread {
 			System.err.println("ERROR: Couldn't close file descriptor for client " + clientAddr + ", garbage collector should close them anyway.");
 			return;
 		}
+		sem.V();
 	}
 
 	private void doAuth() {
 		out.println("Benvenuto nel server di " + COGNOME + " " + NOME + "!");
 		out.println("Per favore, inserisci il tuo nome: ");
-		String[] auth = getCmd().split("@");
-		nome = auth[0];
-		isAdmin = auth.length > 1 && auth[1].equals(PASSWORD);
+		nome = getCmd();
+		if (nome.equals("admin")) {
+			out.println("Inserisci la password di amministratore: ");
+			String password = getCmd();
+			isAdmin = password.equals(PASSWORD);
+		}
 		out.println("Sei loggato al server come " + nome + "[" + clientAddr + "]");
 	}
 

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import utils.jlibs.MutexSemaphore;
 
@@ -13,6 +15,7 @@ import utils.jlibs.MutexSemaphore;
 public class ServerThreaded {
 	protected static final boolean DO_TIMEOUT = false;
 	public static final int PORT = 7979;
+	public static final int MAX_CLIENTS = 20;
 	
 	private static BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 	
@@ -39,9 +42,10 @@ public class ServerThreaded {
 		accept = true;
 		new Thread(() -> {
 			while (accept) try {
-				protocols.broadcast("[SERVER] " + stdin.readLine());
+				protocols.broadcast("[SERVER] " + stdin.readLine(), null);
 			} catch (IOException ex) {}
 		});//.start();
+		ExecutorService pool = Executors.newFixedThreadPool(MAX_CLIENTS);
 		while (accept) {
 			Socket sock;
 			try {
@@ -50,11 +54,7 @@ public class ServerThreaded {
 				System.err.println("ERROR: Connection failed with client: " + ex.getMessage());
 				continue;
 			}
-			ServerProtocol p = new ServerProtocol(sock, protocols, s);
-			s.P();
-			protocols.add(p);
-			s.V();
-			p.start();
+			pool.execute(new ServerProtocol(sock, protocols, s));
 		}
 		
 	}
