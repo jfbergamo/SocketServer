@@ -158,7 +158,7 @@ public class Protocol implements Runnable {
 	private char parseOperator(String cmd) throws Exception {
 		// Fa il parsing dell'operatore
 		// In caso di operatore invalido tira una Exception generica
-		if (cmd.length() > 0) {
+		if (cmd.length() == 1) {
 			char op = cmd.charAt(0);
 			switch (op) {
 			case '+':
