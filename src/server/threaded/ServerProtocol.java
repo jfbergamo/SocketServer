@@ -182,8 +182,9 @@ public class ServerProtocol implements Runnable {
 		clientAddr = (!addr.equals(socket.getLocalAddress()) ? addr.toString() : "localhost") 
 				+ ":" + Integer.toString(socket.getPort());
 	}
-
+	
 	private String getCmd() {
+		
 		out.print("\r> ");
 		out.flush();
 		try {
