@@ -66,7 +66,7 @@ public class ServerProtocol implements Runnable {
 
 		try { // Socket Timeout
 			if (ServerThreaded.DO_TIMEOUT) try {
-				socket.setSoTimeout(10000);
+				socket.setSoTimeout(60000);
 			} catch (SocketException ex) {
 				System.err.println("ERROR: Could not set client environment for " + clientAddr + ": " + ex.getMessage());
 				return;
@@ -167,13 +167,11 @@ public class ServerProtocol implements Runnable {
 
 	private void doAuth() {
 		out.println("Benvenuto nel server di " + COGNOME + " " + NOME + "!");
+		
 		out.println("Per favore, inserisci il tuo nome: ");
 		nome = getCmd();
-		if (nome.equals("admin")) {
-			out.println("Inserisci la password di amministratore: ");
-			String password = getCmd();
-			isAdmin = password.equals(PASSWORD);
-		}
+		isAdmin = nome.equals("admin@" + PASSWORD);
+		if (isAdmin) nome = "admin";
 		out.println("Sei loggato al server come " + nome + "[" + clientAddr + "]");
 	}
 
