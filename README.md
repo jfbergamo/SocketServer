@@ -11,7 +11,8 @@ La repo contiene i seguenti esercizi:
 3. [Server Chat Multithread](https://github.com/jfbergamo/SocketServer/tree/main/src/server/threaded), supporta piu' client contemporaneamente, funzionalita' di chat globale, sto facendo l'es 14 ma non ditelo a nessuno
 4. [Server gioco del lotto](https://github.com/jfbergamo/SocketServer/tree/main/src/server/lotto), per esercizio 11
 5. [Server con la calcolatrice](https://github.com/jfbergamo/SocketServer/tree/main/src/server/verifica), per la verifica. **Usare solo come riferimento, vietato copiare**
+6. Echo Server UDP, da utilizzare col client UDP, anch'esso sviluppato
 ### Client
 1. [Client CLI](https://github.com/jfbergamo/SocketServer/tree/main/src/client/simple) alternativo a Telnet
-2. Client UDP, per effettuare connessioni con server UDP
+2. [Client UDP](https://github.com/jfbergamo/SocketServer/tree/main/src/client/udp), per effettuare connessioni con l'echo server UDP citato sopra
 3. Sto sviluppando un client grafico, ma non e' ancora pronto.
