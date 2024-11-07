@@ -15,6 +15,7 @@ public class Server {
 	private static MutexSemaphore mutex;
 	protected static int connections = 0;
 	
+	@SuppressWarnings("resource")
 	public static void main(String[] args) {
 		// Inizializzazioni
 		mutex = new MutexSemaphore();

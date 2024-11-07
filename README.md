@@ -13,4 +13,5 @@ La repo contiene i seguenti esercizi:
 5. [Server con la calcolatrice](https://github.com/jfbergamo/SocketServer/tree/main/src/server/verifica), per la verifica. **Usare solo come riferimento, vietato copiare**
 ### Client
 1. [Client CLI](https://github.com/jfbergamo/SocketServer/tree/main/src/client/simple) alternativo a Telnet
-2. Sto sviluppando un client grafico, ma non e' ancora pronto.
+2. Client UDP, per effettuare connessioni con server UDP
+3. Sto sviluppando un client grafico, ma non e' ancora pronto.
