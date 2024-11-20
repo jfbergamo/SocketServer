@@ -12,6 +12,7 @@ La repo contiene i seguenti esercizi:
 4. [Server gioco del lotto](https://github.com/jfbergamo/SocketServer/tree/main/src/server/lotto), per esercizio 11
 5. [Server con la calcolatrice](https://github.com/jfbergamo/SocketServer/tree/main/src/server/verifica), per la verifica. **Usare solo come riferimento, vietato copiare**
 6. [Echo Server UDP](https://github.com/jfbergamo/SocketServer/tree/main/src/server/udp), da utilizzare col client UDP, anch'esso sviluppato
+7. [Server HTTP](https://github.com/jfbergamo/SocketServer/tree/main/src/server/http), accessibile dai browser
 ### Client
 1. [Client CLI](https://github.com/jfbergamo/SocketServer/tree/main/src/client/simple) alternativo a Telnet
 2. [Client UDP](https://github.com/jfbergamo/SocketServer/tree/main/src/client/udp), per effettuare connessioni con l'echo server UDP citato sopra
