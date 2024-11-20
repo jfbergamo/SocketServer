@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Benvenuto nel nostro sito!</title>
+<style>
+/* CSS per il layout e lo stile della pagina */
+body {
+	font-family: 'Arial', sans-serif;
+	background-color: #e0f7fa; /* Background celeste chiaro */
+	margin: 0;
+	padding: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	color: #333;
+	text-align: center;
+}
+
+.container {
+	background-color: #ffffff; /* Sfondo bianco per il contenitore */
+	border-radius: 12px;
+	box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+	padding: 40px;
+	max-width: 600px;
+	width: 100%;
+	animation: fadeIn 1s ease-in-out;
+}
+
+h1 {
+	font-size: 2.5rem;
+	color: #00838f; /* Colore blu-verde per il titolo */
+	margin-bottom: 20px;
+}
+
+p {
+	font-size: 1.1rem;
+	color: #555; /* Colore grigio per il testo del paragrafo */
+	margin-bottom: 30px;
+}
+
+.btn {
+	background-color: #ff4081; /* Colore rosa per il pulsante */
+	color: white;
+	padding: 12px 25px;
+	font-size: 1.1rem;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	text-decoration: none;
+	transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+	background-color: #f50057; /* Colore rosa più scuro per hover */
+	transform: scale(1.05);
+	/* Leggero ingrandimento del pulsante durante hover */
+}
+
+.btn:active {
+	background-color: #c51162;
+	/* Colore ancora più scuro quando il pulsante è cliccato */
+	transform: scale(1);
+}
+
+/* Animazione per il fade-in della pagina */
+@
+keyframes fadeIn {from { opacity:0;
+	transform: translateY(20px);
+}
+
+to {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+}
+
+/* Aggiunta di uno sfondo colorato al footer */
+footer {
+	background-color: #00838f; /* Stesso colore del titolo */
+	color: white;
+	padding: 20px;
+	text-align: center;
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	font-size: 1rem;
+}
+
+footer a {
+	color: white;
+	text-decoration: none;
+	font-weight: bold;
+}
+</style>
+</head>
+<body>
+
+	<div class="container">
+		<h1>Benvenuto nel nostro sito!</h1>
+		<p>Ci fa piacere averti qui. Esplora il nostro contenuto e scopri
+			cosa abbiamo preparato per te!</p>
+		<a href="/#" class="btn">Clicca per un
+			benvenuto speciale</a>
+	</div>
+
+	<footer>
+		<p>
+			Creato con ❤️ dal nostro team.
+		</p>
+	</footer>
+
+
+	<script>
+        
+    </script>
+
+</body>
+</html>

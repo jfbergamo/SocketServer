@@ -15,6 +15,8 @@ public class HTTPServer {
 			return;
 		}
 		
+		System.out.println("Server HTTP avviato su http://localhost:" + PORT);
+		
 		boolean go = true;
 		while (go) {
 			try {
